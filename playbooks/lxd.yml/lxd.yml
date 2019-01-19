@@ -1,0 +1,36 @@
+---
+- hosts: localhost
+  tasks:
+  - name: Stop containers
+    connection: local
+    become: false
+    lxd_container:
+      name: "{{item}}"
+      state: stopped
+    with_items:
+      - "{{groups['consul']}}"
+    tags: [ 'snapshot' , 'restore' ]
+  - name: Snapshot containers
+    connection: local
+    become: false
+    shell: "lxc snapshot {{item}}"
+    with_items:
+      - "{{groups['consul']}}"
+    tags: [ 'snapshot' ]
+  - name: Restore snapshot containers
+    connection: local
+    become: false
+    shell: "lxc restore {{item}} snap0"
+    with_items:
+      - "{{groups['consul']}}"
+    tags: [ 'restore' ]
+  - name: Start containers
+    connection: local
+    become: false
+    lxd_container:
+      name: "{{item}}"
+      state: started
+    with_items:
+      - "{{groups['consul']}}"
+    tags: [ 'snapshot' , 'restore' ]
+

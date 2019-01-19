@@ -50,7 +50,7 @@
 
 - name: Install PIP
   package:
-    name: python-pip
+    name: python3-pip
     state: present
 
 - name: Upgrade PIP

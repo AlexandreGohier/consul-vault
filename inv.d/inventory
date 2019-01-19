@@ -29,6 +29,6 @@ consul-client
 consul-server
 
 [all:vars]
-ansible_user=vagrant
+ansible_user=deploy
 ansible_ssh_common_args='-o "UserKnownHostsFile /dev/null"'
-
+ansible_python_interpreter=/usr/bin/python3

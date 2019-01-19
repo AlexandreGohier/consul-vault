@@ -1,8 +1,8 @@
 ---
 # defaults file for ansible-role-haproxy-install
 
-haproxy_src: "http://www.haproxy.org/download/1.8/src/haproxy-1.8.12.tar.gz"
-haproxy_chksum: "md5:9f37013ec1e76942a67a9f7c067af9f2"
+haproxy_src: "http://www.haproxy.org/download/1.8/src/haproxy-1.8.16.tar.gz"
+haproxy_chksum: "md5:a6d8438335140d91f32089e1b671307f"
 haproxy_bin_path: "/usr/bin"
 haproxy_conf: "/etc/haproxy/haproxy.cfg"
 haproxy_mc: "2000"
