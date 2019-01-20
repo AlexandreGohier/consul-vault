@@ -3,6 +3,13 @@ Hashicorp vault & consul cluster
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+|============> Why this fork? <============|
+|:---:|  
+|I forked this awesome project to port back additional code to make it compatible with a LXD backend, using lightweight system containers instead of VMs.|
+|I'm aiming for minimal impact on original code so for now check the docs in the lxd folder|
+|PLEASE DO NOT BUILD A VAULT CLUSTER USING THIS FORK TO STORE ACTUAL SECRETS - IT IS NOT SAFE AT ALL --> MEMLOCK IS DISABLED - If you are building a real cluster to store real secrets, use the original code and real instances|   
+
+
 Installs & confgures Hashicorp's Consul & Vault + HAProxy to run as an HA cluster
 
 ### Symbolic representation overview of deployment
@@ -81,4 +88,5 @@ Author Information
 ------------------
 
 Adam Goldsmith
+& William Cocker for LXD backend code
 
