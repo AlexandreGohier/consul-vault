@@ -1,8 +1,8 @@
 ---
 # defaults file for ansible-role-vault-install
 
-vault_src: "https://releases.hashicorp.com/vault/1.0.1/vault_1.0.1_linux_amd64.zip"
-vault_chksum: "sha256:1ea02627d0157dc844012995123f1cde86a02cb3b45030a9526057d12ee8d924"
+vault_src: "https://releases.hashicorp.com/vault/1.1.2/vault_1.1.2_linux_amd64.zip"
+vault_chksum: "sha256:e927fd4daac11f6c7b8b3f1f53f2017516e29e99585dc975b657acdeac43500b"
 vault_bin_path: "/usr/bin"
 vault_conf: "/etc/vault/config.hcl"
 tls_disable: "false"
