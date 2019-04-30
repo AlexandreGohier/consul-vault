@@ -22,9 +22,9 @@
 
 ---
 ## Tested OS
-- LXD 3.0.3 host running on Ubuntu 18.04 (amd64)
-- LXD containers for consul-vault project running on Ubuntu 18.04 (amd64)
-- LXD containers for vault-managed clients (SSH signer) running on Ubuntu 18.04 (amd64)
+- LXD 3.0.3 host running on Ubuntu 18.04.2 LTS (amd64)
+- LXD containers for consul-vault project running on Ubuntu 18.04.2 LTS (amd64)
+- LXD containers for vault-managed clients (SSH signer) running on Ubuntu 18.04.2 LTS (amd64)
 
 _Since I use cloud-init functionalities to setup the LXD containers, it was easier to use the Ubuntu LXD images with cloud-init preinstalled. You can probably use any other OS that is compatible with the original project as long as you customize your images first to include cloud-init. More information on this here:_ [Are there any plans to add cloud-init to the images provided at images.linuxcontainers.org?](https://discuss.linuxcontainers.org/t/are-there-any-plans-to-add-cloud-init-to-the-images-provided-at-images-linuxcontainers-org/3271)
 
@@ -39,138 +39,16 @@ _Since I use cloud-init functionalities to setup the LXD containers, it was easi
 ### LXD
 You need to install and initialize LXD prior to using Terraform to create the backend containers. I am using LXD v3.0.3 (latest LTS version as of this writing).
 
-- The default profile
-
-```
-config: {}
-description: Default LXD profile
-devices:
-  eth0:
-    name: eth0
-    nictype: bridged
-    parent: lxdbr0
-    type: nic
-  root:
-    path: /
-    pool: default
-    type: disk
-name: default
-```
-
-- The network bridge lxdbr0  
-
-_Be careful to set the appropriate IPv4 address_
-
-```
-config:
-  ipv4.address: 10.1.42.1/24
-  ipv4.nat: "true"
-  ipv6.address: none
-description: ""
-name: lxdbr0
-type: bridge
-managed: true
-status: Created
-locations:
-- none
-```
-
-- The default storage pool   
-
-_Use btrfs or zfs for faster snapshot / restore operations. You won't need 200GB. The project's 10 containers + 1 snapshot each + 2 clients + 1 Ubuntu image will use a little under 40GB. So 50GB should be enough to start with._
-
-```
-config:
-  size: 200GB
-  source: /var/lib/lxd/disks/default.img
-description: ""
-name: default
-driver: btrfs
-status: Created
-locations:
-- none
-```
-
-- Example LXD initialization using the LXD init --preseed command  
-
-_Sample preseed file to initialize LXD with a storage pool on the same volume (virtual btrfs volume)_  
-
-```
-config: {}
-networks:
-- config:
-    ipv4.address: 10.1.42.1/24
-    ipv4.nat: "true"
-    ipv6.address: none
-  description: ""
-  managed: false
-  name: lxdbr0
-  type: ""
-storage_pools:
-- config:
-    size: 200GB
-  description: ""
-  name: default
-  driver: btrfs
-profiles:
-- config: {}
-  description: ""
-  devices:
-    eth0:
-      name: eth0
-      nictype: bridged
-      parent: lxdbr0
-      type: nic
-    root:
-      path: /
-      pool: default
-      type: disk
-  name: default
-cluster: null
-```
-
-_Sample preseed file to initialize LXD with the storage pool on the dedicated /dev/vdb volume_  
-
-```
-config: {}
-networks:
-- config:
-    ipv4.address: 10.1.42.1/24
-    ipv4.nat: "true"
-    ipv6.address: none
-  description: ""
-  managed: false
-  name: lxdbr0
-  type: ""
-storage_pools:
-- config:
-    source: /dev/vdb
-  description: ""
-  name: default
-  driver: btrfs
-profiles:
-- config: {}
-  description: ""
-  devices:
-    eth0:
-      name: eth0
-      nictype: bridged
-      parent: lxdbr0
-      type: nic
-    root:
-      path: /
-      pool: default
-      type: disk
-  name: default
-cluster: null
-```
+__The LXD installation and initialisation process can be automated using Ansible. See [this role](https://github.com/WilliamCocker/terraform/tree/master/roles/ansible-role-lxd-init) for an example on how to do that.__
 
 ### Terraform & LXD provider
 
 You need to install [Terraform](https://www.terraform.io/downloads.html) on the host along with the [LXD provider](https://github.com/sl1pm4t/terraform-provider-lxd/releases). 
 
-- This is a community Terraform provider and as such it must be downloaded separately
+- This is a community provider for Terraform and as such it must be downloaded separately
 - Unzip & Copy to $PATH or the ~/.terraform.d/plugins directory so Terraform can find it
+
+__The Terraform and LXD provider installation can be automated using Ansible. See [this playbook](https://github.com/WilliamCocker/terraform) for an example on how to do that.__
 
 ---
 ## Create the backend containers
@@ -355,6 +233,29 @@ The playbook will stop all containers, restore each container's `snap0` snapshot
 ## Install consul-vault
 
 Once your containers are up and running, you can simply run `./deploy.sh` - refer to the original documentation for further information.
+
+---
+## VIP not working - need to bind each HAProxy on its own IP address
+
+Since I did not get the VIP to work, the default HAProxy configuration has to be modified. I'm still hoping for a solution to the VIP problem so I won't be updating the Ansible playbooks.
+
+On both haproxy servers, just update the file `/etc/haproxy/haproxy.cfg`
+
+For haproxy-s1:
+
+```
+frontend vault
+  bind 10.1.42.11:8200
+```
+
+For haproxy-s2:
+
+```
+frontend vault
+  bind 10.1.42.12:8200
+```
+
+Then restart both containers. This way you can still simulate interacting with vault through HAProxy --> Consul --> Vault. The only limitation is the missing load balancing features and VIP, you need to address each HAProxy server directly.
 
 ---
 ## Start using Vault & create client containers
