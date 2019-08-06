@@ -16,8 +16,8 @@
 |Component|What works?|What differs?|
 |:---:|---|---|
 |Consul|Fully functional|Nothing, code is the same|
-|Vault|Fully functional from user's perspective|Unsafe (memlock disabled) - updated to Vault v1.1.2 - uses python3-pip|
-|HAProxy|Both HAProxy containers are fully functional|Updated to HAProxy v1.8.19|
+|Vault|Fully functional from user's perspective|Unsafe (memlock disabled) - updated to Vault v1.2.0 - uses python3-pip|
+|HAProxy|Both HAProxy containers are fully functional|Updated to HAProxy v1.8.20|
 |Keepalived|Doesn't work - VIP can't be used on LXD networking - probably a multicast problem|Nothing, code is the same|
 
 ---

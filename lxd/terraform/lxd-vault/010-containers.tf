@@ -1,15 +1,15 @@
 variable "container_names" {
   default = {
-    "0" = "haproxy-s1"
-    "1" = "haproxy-s2"
-    "2" = "consul-s1"
-    "3" = "consul-s2"
-    "4" = "consul-s3"
-    "5" = "consul-s4"
-    "6" = "consul-s5"
-    "7" = "vault-s1"
-    "8" = "vault-s2"
-    "9" = "vault-s3"
+    "0" = "haproxys1"
+    "1" = "haproxys2"
+    "2" = "consuls1"
+    "3" = "consuls2"
+    "4" = "consuls3"
+    "5" = "consuls4"
+    "6" = "consuls5"
+    "7" = "vaults1"
+    "8" = "vaults2"
+    "9" = "vaults3"
   }
 }
 
@@ -44,30 +44,30 @@ variable "container_ports" {
 }
 
 resource "lxd_container" "vault" {
-  count = 10
-  name      = "${lookup(var.container_names, count.index)}"
+  count     = 10
+  name      = var.container_names[count.index]
   image     = "ubuntu:18.04"
   ephemeral = false
-  profiles  = ["default", "${lxd_profile.vault_config.name}"]
+  profiles  = ["default", lxd_profile.vault_config.name]
 
-  config {
-    boot.autostart = true
-#    user.user-data = "${file("cloud-init_${lookup(var.container_names, count.index)}_user-data.conf")}"
+  config = {
+    "boot.autostart" = true
   }
+
+  #    user.user-data = "${file("cloud-init_${lookup(var.container_names, count.index)}_user-data.conf")}"
 
   device {
     name = "eth0"
     type = "nic"
-    properties {
-      nictype = "bridged"
-      parent = "lxdbr0"
-      ipv4.address = "${lookup(var.container_ips, count.index)}" 
+    properties = {
+      nictype      = "bridged"
+      parent       = "lxdbr0"
+      "ipv4.address" = var.container_ips[count.index]
     }
-}
-
-  provisioner "local-exec" {
-    command ="lxc config device add ${self.name} myport22 proxy listen=tcp:0.0.0.0:${lookup(var.container_ports, count.index)} connect=tcp:localhost:22"
   }
 
+  provisioner "local-exec" {
+    command = "lxc config device add ${self.name} myport22 proxy listen=tcp:0.0.0.0:${var.container_ports[count.index]} connect=tcp:localhost:22"
+  }
 }
 
